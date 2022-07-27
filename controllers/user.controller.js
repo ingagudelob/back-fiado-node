@@ -1,4 +1,6 @@
 const { response, request } = require("express");
+const bcryptjs = require("bcryptjs");
+const User = require("../models/user");
 
 // Metofo get
 const getUser = (req = request, res = response) => {
@@ -17,11 +19,23 @@ const getUser = (req = request, res = response) => {
   });
 };
 
-const postUser = (req = request, res) => {
+const postUser = async (req = request, res = response) => {
   const body = req.body;
+  const { email } = body;
+
+  // Crea la instancia preparandola para enviarla al repositorio.
+  const user = new User(body);
+
+  // Encriptar contrañesa, salt = 10 por defecto
+  const salt = bcryptjs.genSaltSync();
+  user.password = bcryptjs.hashSync(body.password, salt);
+
+  // Envio al repositorio
+  await user.save();
 
   res.status(201).json({
-    msg: `Se ha creado el usuario == ${body.name} == correctamente`,
+    msg: `Se ha creado el usuario == ${user.firstName} == correctamente`,
+    user,
   });
 };
 

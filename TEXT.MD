@@ -2,6 +2,8 @@
 
 ## Crear un servido con Express basado en clases y Variables de estado
 
+0. Inicialmente en el package.json agregamos en el script el "start"
+
 1. Instalamos npm i express
 2. Instalamos npm i dotenv
 3. Servidor con express basado en clases
@@ -21,3 +23,5 @@
    b. creamos archivo js de acuerdo a ls rutas ej: user.router
    c. en el server llamamos el router por medio de una solicitud condicional, con un path.
    d. Separamos el controlador de la ruta. Se crea un archivo controller y creamos las funciones y las exportamos.
+9. Conectar app con la base de datos. paquete npm i mongoose
+10. Realizar validacion de datos obligatorios. Paquete express-validator. En las rutas
