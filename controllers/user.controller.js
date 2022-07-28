@@ -2,26 +2,27 @@ const { response, request } = require("express");
 const bcryptjs = require("bcryptjs");
 const User = require("../models/user");
 
-// Metofo get
-const getUser = (req = request, res = response) => {
+//? Metodo get - Para obtener los datos del usuario
+const getUser = async (req = request, res = response) => {
   // 403 - Llamada iliegal sin token
   // http://localhost:8080/api/user?nombre=jaime&edad=36&id=101
 
-  const { nombre = "No Name", edad, id, page = "1", limit } = req.query;
+  const { limite = 10, desde = 0 } = req.query;
 
-  res.json({
-    msg: "get API - Controller",
-    nombre,
-    edad,
-    id,
-    page,
-    limit,
-  });
+  //! Con esta logica, pudo ahcer las dos promesas simultaneas a traves del Promise
+  //! me reduce el tiempo de respuesta
+  const [length, usersData] = await Promise.all([
+    User.countDocuments({ state: true }),
+    User.find({ state: true }).skip(desde).limit(limite),
+  ]);
+
+  res.json({ length, usersData });
 };
+
+//? Metodo POST - Para obtener los datos del usuario
 
 const postUser = async (req = request, res = response) => {
   const body = req.body;
-  const { email } = body;
 
   // Crea la instancia preparandola para enviarla al repositorio.
   const user = new User(body);
@@ -39,11 +40,42 @@ const postUser = async (req = request, res = response) => {
   });
 };
 
-const putUser = (req, res) => {
-  // 403 - Llamada iliegal sin token
+//? Metodo para actualizar un usuario
+
+const putUser = async (req = request, res) => {
+  const { id } = req.params;
+
+  // discrimino las variables, si vienen
+  const { password, google, email, _id, dni, ...resto } = req.body;
+
+  // TODO: Validar contra base de datos
+  if (password) {
+    // Encriptar contrañesa, salt = 10 por defecto
+    const salt = bcryptjs.genSaltSync();
+    resto.password = bcryptjs.hashSync(resto.password, salt);
+  }
+
+  const userUpdate = await User.findByIdAndUpdate(id, resto);
+
   res.json({
-    ok: true,
-    msg: "se ha actualizado correctamente - Controller",
+    msg: `se ha actualizado correctamente - ID: ${id}`,
+    userUpdate,
+  });
+};
+
+const deleteUserOnce = async (req = request, res) => {
+  const { id } = req.params;
+  // 403 - Llamada iliegal sin token
+
+  // Borrado fisicamente
+  // const userDelete = await User.findByIdAndDelete(id);
+
+  // Cambio de estado para no perder la referencia
+  const userDelete = await User.findByIdAndUpdate(id, { state: false });
+
+  res.json({
+    userDelete,
+    msg: `delete user con ID: ${id}  - Controller`,
   });
 };
 
@@ -55,15 +87,6 @@ const deleteUserAll = (req, res) => {
   });
 };
 
-const deleteUserOnce = (req = request, res) => {
-  const id = req.params.id;
-  // 403 - Llamada iliegal sin token
-  res.json({
-    ok: true,
-    msg: `delete user con ID: ${id}  - Controller`,
-  });
-};
-
 module.exports = {
   getUser,
   postUser,
@@ -71,3 +94,10 @@ module.exports = {
   deleteUserAll,
   deleteUserOnce,
 };
+
+//* Cuantos registros tengo activos, Estados en true
+// Envio un objeto con la condición
+// const length = await User.countDocuments({ state: true });
+
+//* Limites de paginacion de las colecciones y con estado activo (true)
+// const usersData = await User.find({ state: true }).skip(desde).limit(limite);
