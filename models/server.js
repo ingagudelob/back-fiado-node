@@ -8,6 +8,7 @@ class Server {
     this.app = express();
     this.port = process.env.PORT;
     this.userPath = "/api/user";
+    this.authPath = "/api/auth";
 
     // Connection BD
     this.conectarDb();
@@ -36,6 +37,7 @@ class Server {
 
   routes() {
     // utilizo el middleware de cors
+    this.app.use(this.authPath, require("../routes/auth.router"));
     this.app.use(this.userPath, require("../routes/user.router"));
   }
 
