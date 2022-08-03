@@ -10,13 +10,28 @@ const isValidateRole = async (role = "") => {
 
 const emailExiste = async (email = "") => {
   const existe = await User.findOne({ email });
-  console.log(email);
   if (existe) {
     throw new Error(`El email ${email} esta registrado en la DB`);
+  }
+};
+
+const emailNoExiste = async (email = "") => {
+  const existe = await User.findOne({ email });
+  if (!existe) {
+    throw new Error(`El email ${email} no existe en la DB`);
+  }
+};
+
+const beUserById = async (_id) => {
+  const exists = await User.findById({ _id });
+  if (!exists) {
+    throw new Error(`El ID: ${_id} no existe en la DB`);
   }
 };
 
 module.exports = {
   isValidateRole,
   emailExiste,
+  beUserById,
+  emailNoExiste,
 };

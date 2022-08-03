@@ -54,11 +54,16 @@ const UserSchema = Schema({
   img: {
     type: String,
   },
+  rating: {
+    type: Number,
+    default: 0,
+  },
 });
 
 // ! Redfinir Metodo toString para no retornar la version y la contraseña
 UserSchema.methods.toJSON = function () {
-  const { __v, password, ...user } = this.toObject();
+  const { __v, password, _id, ...user } = this.toObject();
+  user.uid = _id;
   return user;
 };
 
