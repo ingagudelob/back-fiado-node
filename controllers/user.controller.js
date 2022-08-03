@@ -65,17 +65,14 @@ const putUser = async (req = request, res) => {
 
 const deleteUserOnce = async (req = request, res) => {
   const { id } = req.params;
-  // 403 - Llamada iliegal sin token
-
   // Borrado fisicamente
   // const userDelete = await User.findByIdAndDelete(id);
 
   // Cambio de estado para no perder la referencia
   const userDelete = await User.findByIdAndUpdate(id, { state: false });
-
   res.json({
-    userDelete,
     msg: `delete user con ID: ${id}  - Controller`,
+    userDelete,
   });
 };
 

@@ -1,7 +1,10 @@
 // ? Aca definimos la funcion Router desde express
 const { isValidateRole } = require("../helpers/db.validators");
-const { validarCampos } = require("../middlewares/validator.middleware");
 const { emailExiste, beUserById } = require("../helpers/db.validators");
+
+const { validarCampos } = require("../middlewares/validator.middleware");
+const validatorJWT = require("../middlewares/validator-jwt");
+const { validatorAdminRole } = require("../middlewares/validator-roles");
 
 const { Router } = require("express");
 const { check } = require("express-validator");
@@ -53,6 +56,8 @@ router.put(
 router.delete(
   "/:id",
   [
+    validatorJWT,
+    validatorAdminRole,
     check("id", "No es un ID valido para Mongo").isMongoId(),
     check("id").custom(beUserById),
     validarCampos,
